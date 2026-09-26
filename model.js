@@ -2,15 +2,16 @@ import * as THREE from 'three';
 import {OrbitControls} from './OrbitControls.js';
 import {historicPaths,historicBunkers,historicBuildings,hp} from './historical-geometry.js';
 import {currentGeometry} from './current-geometry.js';
+import {createExplorer} from './explorer.js';
 
 const $=s=>document.querySelector(s);
 const host=$('#scene');
-let era='1967', labelsVisible=true;
+let era='1967', labelsVisible=false;
 const materials={};
 function material(name,color){return materials[name]??=new THREE.MeshStandardMaterial({color,roughness:.96});}
 const earth=material('earth',0x9e8865),stone=material('stone',0xb9ab8c),concrete=material('concrete',0xb7b8af),dark=material('dark',0x333a36),roof=material('roof',0x888f83),grass=material('grass',0x667762),pathMaterial=material('path',0xb7afa0);
 const groups={},labelSets={},anchors={};
-let scene,camera,renderer,controls;
+let scene,camera,renderer,controls,explorer;
 
 function dist(x,z,a,b){let dx=b[0]-a[0],dz=b[1]-a[1];let t=Math.max(0,Math.min(1,((x-a[0])*dx+(z-a[1])*dz)/(dx*dx+dz*dz||1)));return Math.hypot(x-a[0]-t*dx,z-a[1]-t*dz);}
 const segments=paths=>paths.flatMap(p=>p.slice(1).map((b,i)=>[p[i],b]));
@@ -30,7 +31,20 @@ for(const [px,py] of historicBunkers){const [x,z]=hp([px,py]);box(g,.75,.48,.65,
 for(const b of historicBuildings){const [x,z]=hp([b.x,b.y]),w=b.w/10,d=b.d/10;box(g,w,.9,d,x,historicHeight(x,z)+.3,z,stone);if(b.name==='Barracks'){const r=new THREE.CylinderGeometry(d/2,d/2,w,24,1,false,0,Math.PI);const m=mesh(g,r,roof,x,historicHeight(x,z)+.78,z);m.rotation.z=Math.PI/2;}else box(g,w+.08,.12,d+.08,x,historicHeight(x,z)+.82,z,roof);}
 const [bx,bz]=hp([196,208]);box(g,1.05,.52,1.1,bx,historicHeight(bx,bz)+.03,bz,concrete);
 const [wx,wz]=hp([285,288]);for(const dx of [-.35,.35])for(const dz of [-.35,.35])box(g,.1,1.6,.1,wx+dx,historicHeight(wx,wz)+.8,wz+dz,concrete);mesh(g,new THREE.CylinderGeometry(.6,.6,.7,24),concrete,wx,historicHeight(wx,wz)+1.95,wz);
+addHistoricDetail(g);
 labelSets['1967']=[label('WESTERN TRENCH',-10,9,historicHeight),label('EASTERN TRENCH',17,0,historicHeight),label('CENTRAL TRENCH',7,10,historicHeight),label('GREAT BUNKER',bx-2,bz-1,historicHeight),label('N',0,-25,historicHeight)];anchors['1967']=new THREE.Vector3(-6.7,historicHeight(-6.7,-.5)+.3,-.5);}
+
+function addHistoricDetail(g){
+  const wireMat=new THREE.LineBasicMaterial({color:0x544e42});
+  // Two northern wire arcs traced from the map, not inferred minefield extents.
+  for(const pixels of [[[196,52],[227,34],[261,23],[291,21],[331,20],[365,19],[397,23],[422,43],[436,65]],[[208,103],[236,81],[268,66],[300,57],[338,49],[368,49],[398,57],[418,77]]]){
+    const points=pixels.map(hp);const vectors=points.map(([x,z])=>new THREE.Vector3(x,historicHeight(x,z)+.5,z));g.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(vectors),wireMat));
+    for(let i=1;i<points.length;i++){const a=points[i-1],b=points[i],len=Math.hypot(b[0]-a[0],b[1]-a[1]);for(let t=0;t<len;t+=.65){const x=a[0]+(b[0]-a[0])*t/len,z=a[1]+(b[1]-a[1])*t/len;box(g,.045,.55,.045,x,historicHeight(x,z)+.26,z,dark);}}
+  }
+  for(const [px,py] of historicBunkers){const [x,z]=hp([px,py]),y=historicHeight(x,z);box(g,.85,.11,.73,x,y+.28,z,concrete);box(g,.25,.28,.035,x,y-.05,z+.34,dark);}
+  // The long central building's doors give scale without claiming an interior.
+  const [x,z]=hp([368,220]);for(let i=-2;i<=2;i++)box(g,.03,.35,.26,x-.71,historicHeight(x,z)+.22,z+i*1.1,dark);
+}
 
 function buildModern(){const g=groups.today=new THREE.Group();scene.add(g);g.visible=false;
 // This preserves only an interpreted western route. It is deliberately not a
@@ -45,20 +59,21 @@ if(f.id==='280268884'){for(let i=0;i<3;i++){const m=mesh(g,new THREE.CylinderGeo
 labelSets.today=[label('MUSEUM · ROOF FORM APPROXIMATE',5,-3,modernHeight),label('SURVIVING WESTERN TRENCH · APPROX.',-6,-8,modernHeight),label('MODERN SITE OUTLINE',-10,14,modernHeight),label('N',0,-25,modernHeight)];anchors.today=new THREE.Vector3(-5.8,modernHeight(-5.8,-1)+.3,-1);
 }
 
-function reset(){camera.position.set(42,52,67);controls.target.set(0,0,0);controls.update();}
+function reset(){camera.position.set(19,58,43).multiplyScalar(Math.max(1,1.32/camera.aspect));controls.target.set(0,0,-1);controls.update();}
 function resize(){camera.aspect=host.clientWidth/host.clientHeight;camera.updateProjectionMatrix();renderer.setSize(host.clientWidth,host.clientHeight);}
-function switchEra(next){era=next;Object.entries(groups).forEach(([key,g])=>g.visible=key===era);$('#era1967').setAttribute('aria-pressed',era==='1967');$('#eraToday').setAttribute('aria-pressed',era==='today');const h=era==='1967';$('#eraCaption').textContent=h?'THE BATTLEFIELD · 1967':'THE MEMORIAL · PARTIAL MODEL';$('#eraTitle').textContent=h?'Before the memorial':'A place of remembrance';$('#eraDescription').textContent=h?'Follow the western, central and eastern trenches of the Jordanian outpost. The main routes are traced from the historical battle map.':'Explore mapped building footprints and paths. The western trench largely survives; much of the eastern trench was covered.';$('#accuracyText').textContent=h?'Trench layout follows a published diagram. Heights, widths and building forms are estimates.':'Mapped footprints with estimated heights. Surviving trench alignment is approximate; current details are incomplete.';$('#modeStatus').textContent=h?'Historical plan · Hand-traced layout':'Modern map data · Partial reconstruction';$('#mapCredit').textContent=h?'Trench plan: Ammunition Hill museum / Wikimedia · CC BY-SA 2.5':'Map data © OpenStreetMap contributors · ODbL';$('#mapButton').hidden=!h;createLabels();closeStory();}
+function switchEra(next){era=next;document.body.classList.toggle('modern-view',era==='today');explorer?.setEra(era==='1967');Object.entries(groups).forEach(([key,g])=>g.visible=key===era);$('#era1967').setAttribute('aria-pressed',era==='1967');$('#eraToday').setAttribute('aria-pressed',era==='today');const h=era==='1967';$('#eraCaption').textContent=h?'THE BATTLEFIELD · 1967':'THE MEMORIAL · PARTIAL MODEL';$('#eraTitle').textContent=h?'Before the memorial':'A place of remembrance';$('#eraDescription').textContent=h?'Follow the western, central and eastern trenches of the Jordanian outpost. Hover over a numbered place or play the battle sequence below.':'Explore mapped building footprints and paths. The western trench largely survives; much of the eastern trench was covered.';$('#accuracyText').textContent=h?'Trench layout follows a published diagram. Heights, widths and building forms are estimates.':'Mapped footprints with estimated heights. Surviving trench alignment is approximate; current details are incomplete.';$('#modeStatus').textContent=h?'Historical plan · Hand-traced layout':'Modern map data · Partial reconstruction';$('#mapCredit').textContent=h?'Trench plan: Ammunition Hill museum / Wikimedia · CC BY-SA 2.5':'Map data © OpenStreetMap contributors · ODbL';$('#mapButton').hidden=!h;createLabels();closeStory();resize();}
 function createLabels(){$('#labels').replaceChildren();for(const l of labelSets[era]){l.el=document.createElement('span');l.el.className='model-label';l.el.textContent=l.text;$('#labels').append(l.el);}}
 let pinned=false,hoverTimer;const portrait=$('#portrait'),story=$('#story'),marker=$('#marker');
-function openStory(){clearTimeout(hoverTimer);story.hidden=false;portrait.setAttribute('aria-expanded','true');}
+function openStory(event){if(event?.type==='mouseenter'&&document.activeElement?.matches('.hotspot,.landmark-entry'))return;explorer?.close();clearTimeout(hoverTimer);story.hidden=false;portrait.setAttribute('aria-expanded','true');}
 function closeStory(){clearTimeout(hoverTimer);story.hidden=true;pinned=false;portrait.setAttribute('aria-expanded','false');}
 function leaveStory(){if(!pinned)hoverTimer=setTimeout(()=>{if(!story.matches(':hover')&&!marker.matches(':hover'))closeStory();},500);}
 marker.addEventListener('mouseenter',openStory);marker.addEventListener('mouseleave',leaveStory);story.addEventListener('mouseenter',()=>clearTimeout(hoverTimer));story.addEventListener('mouseleave',leaveStory);portrait.addEventListener('focus',openStory);portrait.addEventListener('click',()=>{if(pinned)closeStory();else{pinned=true;openStory();}});$('#close').onclick=closeStory;document.addEventListener('keydown',e=>{if(e.key==='Escape')closeStory();});document.addEventListener('focusin',e=>{if(!marker.contains(e.target)&&!story.contains(e.target)&&!pinned)closeStory();});
-for(const [button,dialog] of [['#sourcesButton','#sourcesDialog'],['#mapButton','#mapDialog']]){$(button).onclick=()=>{closeStory();$(dialog).showModal();};$(dialog).querySelector('.dialog-close').onclick=()=>$(dialog).close();$(dialog).addEventListener('click',e=>{if(e.target===$(dialog)){const r=e.target.getBoundingClientRect();if(e.clientX<r.left||e.clientX>r.right||e.clientY<r.top||e.clientY>r.bottom)e.target.close();}});}
+for(const [button,dialog] of [['#sourcesButton','#sourcesDialog'],['#mapButton','#mapDialog']]){$(button).onclick=()=>{closeStory();explorer?.close();$(dialog).showModal();};$(dialog).querySelector('.dialog-close').onclick=()=>$(dialog).close();$(dialog).addEventListener('click',e=>{if(e.target===$(dialog)){const r=e.target.getBoundingClientRect();if(e.clientX<r.left||e.clientX>r.right||e.clientY<r.top||e.clientY>r.bottom)e.target.close();}});}
 try{scene=new THREE.Scene();camera=new THREE.PerspectiveCamera(40,1,.1,220);renderer=new THREE.WebGLRenderer({antialias:true,alpha:true});renderer.setPixelRatio(Math.min(devicePixelRatio,1.75));renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;renderer.setClearColor(0,0);host.appendChild(renderer.domElement);controls=new OrbitControls(camera,renderer.domElement);controls.enableDamping=true;controls.enablePan=true;controls.minDistance=18;controls.maxDistance=125;controls.maxPolarAngle=Math.PI*.47;controls.minPolarAngle=.02;
 scene.add(new THREE.HemisphereLight(0xd2e6e9,0x4a4636,2.3));const sun=new THREE.DirectionalLight(0xffe4b5,2.7);sun.position.set(-25,45,25);sun.castShadow=true;sun.shadow.mapSize.set(2048,2048);Object.assign(sun.shadow.camera,{left:-40,right:40,top:40,bottom:-40,near:.1,far:130});sun.shadow.normalBias=.045;scene.add(sun);buildHistoric();buildModern();resize();reset();createLabels();$('#loading').hidden=true;
 $('#era1967').onclick=()=>switchEra('1967');$('#eraToday').onclick=()=>switchEra('today');$('#reset').onclick=reset;$('#top').onclick=()=>{camera.position.set(0,80,.1);controls.target.set(0,0,0);controls.update();};function zoom(f){const v=camera.position.clone().sub(controls.target);v.setLength(THREE.MathUtils.clamp(v.length()*f,controls.minDistance,controls.maxDistance));camera.position.copy(controls.target).add(v);}$('#zoomIn').onclick=()=>zoom(.8);$('#zoomOut').onclick=()=>zoom(1.25);$('#labelsButton').onclick=()=>{labelsVisible=!labelsVisible;$('#labelsButton').setAttribute('aria-pressed',labelsVisible);$('#labels').hidden=!labelsVisible;};window.addEventListener('resize',resize);
 const p=new THREE.Vector3();function place(el,point){p.copy(point).project(camera);el.style.left=(host.offsetLeft+(p.x*.5+.5)*host.clientWidth)+'px';el.style.top=(host.offsetTop+(-p.y*.5+.5)*host.clientHeight)+'px';el.style.visibility=Math.abs(p.x)>1||Math.abs(p.y)>1||p.z>1?'hidden':'visible';}
-function animate(){requestAnimationFrame(animate);controls.update();renderer.render(scene,camera);place(marker,anchors[era]);for(const l of labelSets[era])place(l.el,l.point);}animate();
+explorer=createExplorer({group:groups['1967'],camera,canvas:renderer.domElement,height:historicHeight,place,closeStory});
+let previousFrame=performance.now();function animate(now=performance.now()){requestAnimationFrame(animate);const delta=now-previousFrame;previousFrame=now;controls.update();explorer.update(delta);renderer.render(scene,camera);place(marker,anchors[era]);for(const l of labelSets[era])place(l.el,l.point);}animate();
 renderer.domElement.addEventListener('webglcontextlost',e=>{e.preventDefault();$('#loading').hidden=false;$('#loading').textContent='The 3D view paused. Reload the page to restore it.';});
 }catch(e){$('#loading').textContent='The 3D view could not start. Please use a browser with WebGL enabled.';console.error(e);}

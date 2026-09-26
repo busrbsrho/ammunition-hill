@@ -50,3 +50,7 @@ SOURCES AND ATTRIBUTION
    Official archive: potential source for future measured/historical plans.
 
 Three.js 0.169.0 and OrbitControls: MIT license, copyright Three.js authors.
+
+
+HISTORICAL EXPLORER UPDATE
+19 sourced landmark cards and an 11-phase battle replay. Play/Pause, Stop, previous/next phase, direct phase selection and three speeds are available in the 1967 view. Stop returns to the beginning. Every phase includes Evidence & context. Movements and timing are approximate; actions overlap. See README.md and Sources & accuracy for details.
