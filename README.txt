@@ -54,3 +54,7 @@ Three.js 0.169.0 and OrbitControls: MIT license, copyright Three.js authors.
 
 HISTORICAL EXPLORER UPDATE
 19 sourced landmark cards and an 11-phase battle replay. Play/Pause, Stop, previous/next phase, direct phase selection and three speeds are available in the 1967 view. Stop returns to the beginning. Every phase includes Evidence & context. Movements and timing are approximate; actions overlap. See README.md and Sources & accuracy for details.
+
+
+EITAN AND HEBREW UPDATE
+Choose EN / עברית for English or Hebrew. Click Eitan’s portrait for a dedicated biography with official, Wikipedia and published family sources. Jump to Eitan’s action, then Play, to see his schematic movement alongside the western trench. Earlier positions are unlocated; later phases show a stationary memorial. Return to the battlefield keeps the current replay phase paused. The biography is included inside the standalone HTML.
