@@ -5,7 +5,7 @@ These are NOT exact reconstructions or measured surveys. No verified public
 photogrammetric scan or complete measured trench plan was found.
 
 Open Ammunition-Hill.html from the separate standalone deliverable in a modern
-browser. It embeds the rendering library, geometry, portrait and battle map.
+browser. It embeds the rendering library, geometry, both portraits and battle map.
 The Google Fonts request is optional; system font fallbacks work offline.
 For this multi-file source archive, serve its directory over local HTTP.
 
@@ -58,3 +58,18 @@ HISTORICAL EXPLORER UPDATE
 
 EITAN AND HEBREW UPDATE
 Choose EN / עברית for English or Hebrew. Click Eitan’s portrait for a dedicated biography with official, Wikipedia and published family sources. Jump to Eitan’s action, then Play, to see his schematic movement alongside the western trench. Earlier positions are unlocated; later phases show a stationary memorial. Return to the battlefield keeps the current replay phase paused. The biography is included inside the standalone HTML.
+
+
+YAKI HETZ UPDATE
+Yaki Hetz (Yaakov Haimovitz) is the second soldier. Hover or focus either portrait
+for a summary; click to open that soldier’s biography in English or Hebrew.
+Jump to Yaki’s action selects the Great Bunker phase; press Play to animate the
+schematic local approach. He survived. The next phase holds the final illustrated
+position without claiming where he went afterward. Rewind/Stop restores each
+soldier’s appropriate state. His earlier individual route is not reconstructed.
+The two biography routes are #eitan and #yaki. Yaki’s photo was taken at Ammunition Hill on 7 February 2022. See README.md and the photo credit for provenance.
+
+Portrait: Tal Eidelman (טל אידלמן), CC BY-SA 3.0. Original file unchanged; small
+portraits use a CSS display crop, also under CC BY-SA 3.0.
+https://commons.wikimedia.org/wiki/File:Yaki_Hetz.jpg
+https://creativecommons.org/licenses/by-sa/3.0/

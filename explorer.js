@@ -6,10 +6,11 @@ import {createPlayback} from './playback.js';
 import {language,t,onLanguageChange} from './i18n.js';
 import {landmarksHe,phasesHe,sourcesHe,battleNoteHe} from './history-he.js';
 import {getEitanState,eitanRoute} from './eitan-motion.js';
+import {getYakiState,yakiRoute} from './yaki-motion.js';
 
 // Screen markers and animation follow the source diagram. Neither unit tokens
 // nor their animation speed represent measured positions, strength or time.
-export function createExplorer({group,camera,canvas,height,place,closeStory,onEitanChange=()=>{}}) {
+export function createExplorer({group,camera,canvas,height,place,closeStory,onEitanChange=()=>{},onPersonChange=()=>{}}) {
   const $=s=>document.querySelector(s);
   const layer=$('#hotspots'), card=$('#landmarkCard'), unitLayer=$('#unitLabels');
   let active=true, markersVisible=true, pinned=false, selected=null, closeTimer, pointerDown=false;
@@ -56,14 +57,17 @@ export function createExplorer({group,camera,canvas,height,place,closeStory,onEi
   function render(state){const phase=localizedPhase(battlePhases[state.index]);if(currentIndex!==state.index){currentIndex=state.index;$('#phaseTitle').textContent=phase.title;$('#phaseTime').textContent=phase.time;$('#phaseSummary').textContent=phase.summary;$('#phaseDetail').textContent=phase.detail||'';$('#phaseSelect').value=state.index;$('#phaseProgress').textContent=t('PHASE')+' '+(state.index+1)+' / '+battlePhases.length;sourceLinks($('#phaseSources'),phase.sourceIds);rebuild(phase);[...$('#phaseSteps').children].forEach((b,i)=>{b.setAttribute('aria-current',i===state.index?'step':'false');b.classList.toggle('complete',i<state.index);});}
     $('#playBattle').textContent=t(state.playing?'Ⅱ Pause':state.ended?'↻ Replay':'▶ Play');$('#playBattle').setAttribute('aria-label',t(state.playing?'Pause battle replay':state.ended?'Replay battle':'Play battle replay'));$('#previousPhase').disabled=state.index===0;$('#nextPhase').disabled=state.index===battlePhases.length-1;$('#playStatus').textContent=t(state.ended?'Complete':state.playing?'Playing':'Paused');$('#phaseBar').style.width=(state.progress*100)+'%';
     for(const t of tracks)t.token.position.copy(positionTrack(t,state.progress));
-    const person=getEitanState({phaseId:phase.id,progress:state.progress});eitanTrail.visible=person.mode==='moving';onEitanChange(person);
+    updatePeople(state);
   }
-  const eitanTrail=new THREE.Line(new THREE.BufferGeometry().setFromPoints(eitanRoute.map(p=>vector(p,.55))),new THREE.LineDashedMaterial({color:0xf5d187,dashSize:.18,gapSize:.15}));eitanTrail.computeLineDistances();group.add(eitanTrail);eitanTrail.visible=false;
+  function trail(id,route,color){const line=new THREE.Line(new THREE.BufferGeometry().setFromPoints(route.map(p=>vector(p,.55))),new THREE.LineDashedMaterial({color,dashSize:.18,gapSize:.15}));line.computeLineDistances();line.userData.personId=id;line.visible=false;group.add(line);return line;}
+  const personTrails={eitan:trail('eitan',eitanRoute,0xf5d187),yaki:trail('yaki',yakiRoute,0xa5e5d3)};
+  function updatePeople(state){const input={phaseId:battlePhases[state.index].id,progress:state.progress};const eitan=getEitanState(input),yaki=getYakiState(input);personTrails.eitan.visible=eitan.mode==='moving';personTrails.yaki.visible=yaki.mode==='moving';onEitanChange(eitan);onPersonChange('eitan',eitan);onPersonChange('yaki',yaki);}
   const playback=createPlayback({count:battlePhases.length,duration:9000,onChange:render});render(playback.snapshot());
+  function seekPerson(id){const phaseId={eitan:'western-trench',yaki:'great-bunker'}[id];const index=battlePhases.findIndex(phase=>phase.id===phaseId);if(index<0)throw new RangeError('No battle action phase for person: '+id);return playback.seek(index);}
   $('#playBattle').onclick=()=>{close();playback.snapshot().playing?playback.pause():playback.play();};$('#stopBattle').onclick=()=>playback.stop();$('#previousPhase').onclick=()=>playback.previous();$('#nextPhase').onclick=()=>playback.next();$('#phaseSelect').onchange=e=>playback.seek(Number(e.target.value));$('#replaySpeed').onchange=e=>speed=Number(e.target.value);
   $('#battleNote').textContent=language()==='he'?battleNoteHe:battleNote;
   document.addEventListener('visibilitychange',()=>{if(document.hidden)playback.pause();});
   function renderResearchSources(){$('#researchSources').replaceChildren();for(const [id,s] of Object.entries(allSources)){const p=document.createElement('p'),a=document.createElement('a');a.href=s.url;a.target='_blank';a.rel='noopener';a.textContent=(language()==='he'?(sourcesHe[id]||s.title):s.title)+' ↗';p.append(a);$('#researchSources').append(p);}}renderResearchSources();
   onLanguageChange(()=>{for(const m of markers){const item=localizedLandmark(m.item);m.button.setAttribute('aria-label',item.title);m.button.title=item.title;m.entry.lastChild.textContent=item.title;}battlePhases.forEach((phase,i)=>{const item=localizedPhase(phase);$('#phaseSelect').children[i].textContent=String(i+1).padStart(2,'0')+' · '+item.title;const b=$('#phaseSteps').children[i];b.title=item.title;b.setAttribute('aria-label',t('Phase')+' '+(i+1)+': '+item.title);});currentIndex=-1;render(playback.snapshot());$('#battleNote').textContent=language()==='he'?battleNoteHe:battleNote;renderResearchSources();if(selected)open(landmarks.find(x=>x.id===selected),pinned);});
-  return {update(delta){if(active)playback.tick(Math.min(delta,100)*speed);for(const m of markers)place(m.button,m.point);if(active)for(const t of tracks)place(t.label,t.token.position);},setEra(historical){active=historical;if(!active)playback.pause();layer.hidden=!active||!markersVisible;unitLayer.hidden=!active;$('#battlePanel').hidden=!active;$('#landmarkBrowser').hidden=!active;$('#hotspotsButton').hidden=!active;close();},close,pause:()=>playback.pause(),snapshot:()=>playback.snapshot(),seekEitan:()=>playback.seek(battlePhases.findIndex(p=>p.id==='western-trench')),refreshPerson:()=>onEitanChange(getEitanState({phaseId:battlePhases[playback.snapshot().index].id,progress:playback.snapshot().progress}))};
+  return {update(delta){if(active)playback.tick(Math.min(delta,100)*speed);for(const m of markers)place(m.button,m.point);if(active)for(const t of tracks)place(t.label,t.token.position);},setEra(historical){active=historical;if(!active)playback.pause();layer.hidden=!active||!markersVisible;unitLayer.hidden=!active;$('#battlePanel').hidden=!active;$('#landmarkBrowser').hidden=!active;$('#hotspotsButton').hidden=!active;close();},close,pause:()=>playback.pause(),snapshot:()=>playback.snapshot(),seekPerson,seekEitan:()=>seekPerson('eitan'),refreshPerson:()=>updatePeople(playback.snapshot())};
 }

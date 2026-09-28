@@ -5,6 +5,7 @@ import {currentGeometry} from './current-geometry.js';
 import {createExplorer} from './explorer.js';
 import {initLanguage,t,language,onLanguageChange} from './i18n.js';
 import {initBiography} from './biography.js';
+import {people,portraitSource} from './people.js';
 initLanguage();
 
 const $=s=>document.querySelector(s);
@@ -17,6 +18,8 @@ const groups={},labelSets={},anchors={};
 let scene,camera,renderer,controls,explorer;
 let eitanState={mode:'unlocated',point:null};
 const eitanPoint=new THREE.Vector3();
+let yakiState={mode:'unlocated',point:null};
+const yakiPoint=new THREE.Vector3();
 
 function dist(x,z,a,b){let dx=b[0]-a[0],dz=b[1]-a[1];let t=Math.max(0,Math.min(1,((x-a[0])*dx+(z-a[1])*dz)/(dx*dx+dz*dz||1)));return Math.hypot(x-a[0]-t*dx,z-a[1]-t*dz);}
 const segments=paths=>paths.flatMap(p=>p.slice(1).map((b,i)=>[p[i],b]));
@@ -72,19 +75,27 @@ function updateEraText(){const h=era==='1967';
 }
 function switchEra(next){era=next;document.body.classList.toggle('modern-view',era==='today');Object.entries(groups).forEach(([key,g])=>g.visible=key===era);$('#era1967').setAttribute('aria-pressed',era==='1967');$('#eraToday').setAttribute('aria-pressed',era==='today');updateEraText();$('#mapButton').hidden=era!=='1967';explorer?.setEra(era==='1967');explorer?.refreshPerson();createLabels();closeStory();resize();}
 function createLabels(){$('#labels').replaceChildren();for(const l of labelSets[era]){l.el=document.createElement('span');l.el.className='model-label';l.el.textContent=t(l.text);$('#labels').append(l.el);}}
-let pinned=false,hoverTimer;const portrait=$('#portrait'),story=$('#story'),marker=$('#marker');
-function openStory(event){if(event?.type==='mouseenter'&&document.activeElement?.matches('.hotspot,.landmark-entry'))return;explorer?.close();clearTimeout(hoverTimer);story.hidden=false;}
-function closeStory(){clearTimeout(hoverTimer);story.hidden=true;pinned=false;}
-function leaveStory(){if(!pinned)hoverTimer=setTimeout(()=>{if(!story.matches(':hover')&&!marker.matches(':hover'))closeStory();},500);}
-marker.addEventListener('mouseenter',openStory);marker.addEventListener('mouseleave',leaveStory);story.addEventListener('mouseenter',()=>clearTimeout(hoverTimer));story.addEventListener('mouseleave',leaveStory);portrait.addEventListener('focus',openStory);portrait.addEventListener('click',()=>{explorer?.pause();closeStory();});$('#close').onclick=closeStory;document.addEventListener('keydown',e=>{if(e.key==='Escape')closeStory();});document.addEventListener('focusin',e=>{if(!marker.contains(e.target)&&!story.contains(e.target)&&!pinned)closeStory();});
+let hoverTimer,storyPerson='eitan';const story=$('#story'),marker=$('#marker'),yakiMarker=$('#yakiMarker');
+const personTriggers=[...document.querySelectorAll('[data-person]')];
+function renderStory(){const lang=language(),person=people[storyPerson],data=person.biography[lang];
+  $('#storyPhoto').src=portraitSource(storyPerson);$('#storyPhoto').alt=data.name;$('#storyPhoto').dataset.person=storyPerson;
+  $('#storyTitle').textContent=data.name;$('#storySubtitle').textContent=data.subtitle;
+  $('#storySummary').textContent=person.summary[lang];$('#storyLink').href='#'+storyPerson;
+  $('#storyCredit').textContent=person.photoCredit[lang];$('#storySource').href=person.photoUrl;$('#storySource').textContent=t('Portrait source & rights ↗');
+}
+function openStory(id,event){if(event?.type==='mouseenter'&&document.activeElement?.matches('.hotspot,.landmark-entry'))return;explorer?.close();clearTimeout(hoverTimer);storyPerson=id;renderStory();story.hidden=false;}
+function closeStory(){clearTimeout(hoverTimer);story.hidden=true;}
+function leaveStory(){hoverTimer=setTimeout(()=>{if(!story.matches(':hover')&&!personTriggers.some(el=>el.matches(':hover')||el===document.activeElement))closeStory();},500);}
+for(const trigger of personTriggers){trigger.addEventListener('mouseenter',e=>openStory(trigger.dataset.person,e));trigger.addEventListener('mouseleave',leaveStory);trigger.addEventListener('focus',()=>openStory(trigger.dataset.person));trigger.addEventListener('click',()=>{explorer?.pause();closeStory();});}
+story.addEventListener('mouseenter',()=>clearTimeout(hoverTimer));story.addEventListener('mouseleave',leaveStory);$('#close').onclick=closeStory;document.addEventListener('keydown',e=>{if(e.key==='Escape')closeStory();});document.addEventListener('focusin',e=>{if(!personTriggers.some(el=>el.contains(e.target))&&!story.contains(e.target))closeStory();});
 for(const [button,dialog] of [['#sourcesButton','#sourcesDialog'],['#mapButton','#mapDialog']]){$(button).onclick=()=>{closeStory();explorer?.close();$(dialog).showModal();};$(dialog).querySelector('.dialog-close').onclick=()=>$(dialog).close();$(dialog).addEventListener('click',e=>{if(e.target===$(dialog)){const r=e.target.getBoundingClientRect();if(e.clientX<r.left||e.clientX>r.right||e.clientY<r.top||e.clientY>r.bottom)e.target.close();}});}
 try{scene=new THREE.Scene();camera=new THREE.PerspectiveCamera(40,1,.1,220);renderer=new THREE.WebGLRenderer({antialias:true,alpha:true});renderer.setPixelRatio(Math.min(devicePixelRatio,1.75));renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;renderer.setClearColor(0,0);host.appendChild(renderer.domElement);controls=new OrbitControls(camera,renderer.domElement);controls.enableDamping=true;controls.enablePan=true;controls.minDistance=18;controls.maxDistance=125;controls.maxPolarAngle=Math.PI*.47;controls.minPolarAngle=.02;
 scene.add(new THREE.HemisphereLight(0xd2e6e9,0x4a4636,2.3));const sun=new THREE.DirectionalLight(0xffe4b5,2.7);sun.position.set(-25,45,25);sun.castShadow=true;sun.shadow.mapSize.set(2048,2048);Object.assign(sun.shadow.camera,{left:-40,right:40,top:40,bottom:-40,near:.1,far:130});sun.shadow.normalBias=.045;scene.add(sun);buildHistoric();buildModern();resize();reset();createLabels();$('#loading').hidden=true;
 $('#era1967').onclick=()=>switchEra('1967');$('#eraToday').onclick=()=>switchEra('today');$('#reset').onclick=reset;$('#top').onclick=()=>{camera.position.set(0,80,.1);controls.target.set(0,0,0);controls.update();};function zoom(f){const v=camera.position.clone().sub(controls.target);v.setLength(THREE.MathUtils.clamp(v.length()*f,controls.minDistance,controls.maxDistance));camera.position.copy(controls.target).add(v);}$('#zoomIn').onclick=()=>zoom(.8);$('#zoomOut').onclick=()=>zoom(1.25);$('#labelsButton').onclick=()=>{labelsVisible=!labelsVisible;$('#labelsButton').setAttribute('aria-pressed',labelsVisible);$('#labels').hidden=!labelsVisible;};window.addEventListener('resize',resize);
 const p=new THREE.Vector3();function place(el,point){p.copy(point).project(camera);el.style.left=(host.offsetLeft+(p.x*.5+.5)*host.clientWidth)+'px';el.style.top=(host.offsetTop+(-p.y*.5+.5)*host.clientHeight)+'px';el.style.visibility=Math.abs(p.x)>1||Math.abs(p.y)>1||p.z>1?'hidden':'visible';}
-explorer=createExplorer({group:groups['1967'],camera,canvas:renderer.domElement,height:historicHeight,place,closeStory,onEitanChange:updateEitan});
-$('#jumpToEitan').onclick=()=>{switchEra('1967');explorer.seekEitan();$('#battlePanel').scrollIntoView({block:'center',behavior:'smooth'});};
-let previousFrame=performance.now();function animate(now=performance.now()){requestAnimationFrame(animate);const delta=now-previousFrame;previousFrame=now;if(!$('#mapPage').hidden){controls.update();explorer.update(delta);renderer.render(scene,camera);if(era==='today')place(marker,anchors.today);else if(eitanState.point){const [x,z]=hp(eitanState.point);eitanPoint.set(x,historicHeight(x,z)+.6,z);place(marker,eitanPoint);}for(const l of labelSets[era])place(l.el,l.point);}}animate();
+explorer=createExplorer({group:groups['1967'],camera,canvas:renderer.domElement,height:historicHeight,place,closeStory,onPersonChange:(id,state)=>id==='eitan'?updateEitan(state):updateYaki(state)});
+for(const [id,button] of [['eitan','#jumpToEitan'],['yaki','#jumpToYaki']])$(button).onclick=()=>{switchEra('1967');explorer.seekPerson(id);$('#battlePanel').scrollIntoView({block:'center',behavior:'smooth'});};
+let previousFrame=performance.now();function animate(now=performance.now()){requestAnimationFrame(animate);const delta=now-previousFrame;previousFrame=now;if(!$('#mapPage').hidden){controls.update();explorer.update(delta);renderer.render(scene,camera);if(era==='today')place(marker,anchors.today);else if(eitanState.point){const [x,z]=hp(eitanState.point);eitanPoint.set(x,historicHeight(x,z)+.6,z);place(marker,eitanPoint);}if(era==='1967'&&yakiState.point){const [x,z]=hp(yakiState.point);yakiPoint.set(x,historicHeight(x,z)+.6,z);place(yakiMarker,yakiPoint);}for(const l of labelSets[era])place(l.el,l.point);}}animate();
 renderer.domElement.addEventListener('webglcontextlost',e=>{e.preventDefault();$('#loading').hidden=false;$('#loading').textContent=t('The 3D view paused. Reload the page to restore it.');});
 }catch(e){$('#loading').textContent=t('The 3D view could not start. Please use a browser with WebGL enabled.');console.error(e);}
 
@@ -97,5 +108,14 @@ function updateEitan(state){eitanState=state;const mode=era==='today'?'memorial'
   if($('#eitanExplanation').textContent!==t(explanation))$('#eitanExplanation').textContent=t(explanation);
   $('#avatarCaption').textContent=mode==='memorial'?t('In memory · no further movement'):t('Covering the western advance · approximate route');
 }
-onLanguageChange(()=>{updateEraText();if(scene)createLabels();updateEitan(eitanState);resize();});
-initBiography({onOpen:()=>{explorer?.pause();explorer?.close();closeStory();for(const d of document.querySelectorAll('dialog[open]'))d.close();},onReturn:()=>{resize();},onFollow:()=>{if(explorer){switchEra('1967');explorer.seekEitan();}}});
+function updateYaki(state){yakiState=state;const mode=state.mode;
+  yakiMarker.hidden=era!=='1967'||mode==='unlocated';yakiMarker.dataset.mode=mode;
+  $('#jumpToYaki').hidden=false;
+  const status=era==='today'?'Explore Yaki’s action in the 1967 replay':mode==='unlocated'?'Location not documented in this phase':mode==='moving'?'Overcoming the Great Bunker · approximate route':'Action complete · last illustrated position';
+  const explanation=era==='today'?'Yaki survived the battle. Read his story or return to his documented action.':mode==='unlocated'?'Yaki’s portrait enters the map during the Great Bunker action. His earlier individual route is not reconstructed.':mode==='moving'?'His movement illustrates the action in his award citation. The path and pace are schematic; the bunker interior is not reconstructed.':'Yaki survived. The portrait marks the end of this illustration, not his later whereabouts.';
+  if($('#yakiStatus').textContent!==t(status))$('#yakiStatus').textContent=t(status);
+  if($('#yakiExplanation').textContent!==t(explanation))$('#yakiExplanation').textContent=t(explanation);
+  $('#yakiAvatarCaption').textContent=t(mode==='completed'?'Action complete · last illustrated position':'Overcoming the Great Bunker · approximate route');
+}
+onLanguageChange(()=>{updateEraText();if(scene)createLabels();updateEitan(eitanState);updateYaki(yakiState);if(!story.hidden)renderStory();resize();});
+initBiography({onOpen:()=>{explorer?.pause();explorer?.close();closeStory();for(const d of document.querySelectorAll('dialog[open]'))d.close();},onReturn:()=>{resize();},onFollow:id=>{if(explorer){switchEra('1967');explorer.seekPerson(id);}}});

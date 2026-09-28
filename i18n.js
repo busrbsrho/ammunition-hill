@@ -58,6 +58,19 @@ const he = {
   'Naveh was killed while covering the advance. His portrait now remains as a memorial and does not take part in later phases.':'נאוה נהרג במהלך החיפוי על ההתקדמות. תמונתו נשארת כסמן זיכרון ואינה משתתפת בשלבים המאוחרים.',
   'Return to the battlefield':'חזרה לשדה הקרב','Eitan’s story':'סיפורו של איתן','Read the original accounts':'לקריאת המקורות המלאים','Photograph: Ministry of Defense / Izkor. Rights remain with the source.':'תצלום: משרד הביטחון / יזכור. הזכויות שמורות למקור.',
   'Language':'שפה','Switch to Hebrew':'מעבר לעברית','Switch to English':'מעבר לאנגלית',
+  "Yaki Hetz":"יקי חץ",
+  "Read Yaki Hetz’s story":"לקריאת סיפורו של יקי חץ",
+  "Jump to Yaki’s action":"לשלב הלחימה של יקי",
+  "The people of the hill":"האנשים של הגבעה",
+  "Portrait source & rights ↗":"מקור התצלום וזכויות השימוש ↗",
+  "Explore Yaki’s action in the 1967 replay":"לפעולתו של יקי בשחזור הקרב ב־1967",
+  "Overcoming the Great Bunker · approximate route":"ההתגברות על הבונקר הגדול · מסלול משוער",
+  "Action complete · last illustrated position":"סיום הפעולה · המיקום האחרון בהמחשה",
+  "Yaki survived the battle. Read his story or return to his documented action.":"יקי שרד את הקרב. קראו את סיפורו או חזרו לפעולתו המתועדת.",
+  "Yaki’s portrait enters the map during the Great Bunker action. His earlier individual route is not reconstructed.":"תמונתו של יקי מופיעה במפה בשלב הלחימה בבונקר הגדול. מסלולו האישי בשלבים המוקדמים אינו משוחזר.",
+  "His movement illustrates the action in his award citation. The path and pace are schematic; the bunker interior is not reconstructed.":"התנועה ממחישה את הפעולה המתוארת בכתב העיטור. המסלול והקצב סכמטיים; פנים הבונקר אינו משוחזר.",
+  "Yaki survived. The portrait marks the end of this illustration, not his later whereabouts.":"יקי שרד. התמונה מסמנת את סיום ההמחשה, ולא את מקום הימצאו בהמשך.",
+  "A measured site survey or photogrammetric scan, dated aerial photographs, trench cross-sections, and archival building plans checked against what was actually built. The soldiers’ routes illustrate their documented actions; no personal route is surveyed.":"מדידה או סריקה פוטוגרמטרית של האתר, תצלומי אוויר מתוארכים, חתכי תעלות ותוכניות ארכיוניות שיושוו לבנייה בפועל. מסלולי הלוחמים ממחישים את פעולותיהם המתועדות; אף מסלול אישי אינו מבוסס על מדידה.",
 };
 let lang='en';
 try{lang=new URLSearchParams(location.search).get('lang')||localStorage.getItem('ammunition-hill-language')||'en';}catch{}
