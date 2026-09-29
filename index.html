@@ -1,8 +1,99 @@
 <!doctype html>
-<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Ammunition Hill — Then & Now</title><meta name="description" content="Explore two reference-based 3D models of Ammunition Hill: the 1967 battlefield and the modern memorial."><link rel="stylesheet" href="theme.css"><script type="importmap">{"imports":{"three":"./three.module.js"}}</script></head>
-<body><main id="mapPage">
-<header><a class="brand" href="#map">AH <span>LIVING HISTORY</span></a><div class="era-switch" role="group" aria-label="Choose a period"><button id="era1967" aria-pressed="true">June 1967</button><button id="eraToday" aria-pressed="false">Memorial today</button></div><div class="header-actions"><button id="sourcesButton" class="quiet">Sources & accuracy</button><div class="language-switch" role="group" aria-label="Language"><button data-language="en" translate="no" aria-label="Switch to English">EN</button><button data-language="he" translate="no" aria-label="Switch to Hebrew">עברית</button></div></div></header>
-<aside class="intro-panel"><p class="eyebrow">ONE PLACE · TWO PERIODS</p><h1>Ammunition <br>Hill</h1><p class="hebrew" lang="he" dir="rtl">גבעת התחמושת</p><div class="era-copy"><span id="eraCaption">THE BATTLEFIELD · 1967</span><h2 id="eraTitle">Before the memorial</h2><p id="eraDescription">Follow the western, central and eastern trenches of the Jordanian outpost. Hover over a numbered place or play the battle sequence below.</p></div><div class="legend"><span><i class="trench-key"></i>Trenches</span><span><i class="building-key"></i>Buildings & positions</span></div><div class="accuracy"><b>Reference-based reconstruction</b><p id="accuracyText">Trench layout follows a published diagram. Heights, widths and building forms are estimates.</p></div><button id="mapButton" class="text-button">View the historical map ↗</button><details id="landmarkBrowser"><summary>Explore 19 places <span>Hover · tap · keyboard</span></summary><div id="landmarkList"></div></details><div id="peopleDock"><p class="eyebrow">THE PEOPLE OF THE HILL</p><div id="personDock" class="person-dock"><a class="person-link" data-person="eitan" href="#eitan"><span class="person-photo"><img id="eitanPhoto" src="eitan.jpg" alt="Eitan Naveh"></span><span><b>Eitan Naveh</b><small>Read his full story →</small></span></a><p id="eitanStatus" role="status"></p><p id="eitanExplanation"></p><button id="jumpToEitan">Jump to Eitan’s action</button></div><div id="yakiDock" class="person-dock"><a class="person-link" data-person="yaki" href="#yaki"><span class="person-photo"><img id="yakiPhoto" src="yaki.jpg" alt="Yaki Hetz"></span><span><b>Yaki Hetz</b><small>Read his full story →</small></span></a><p id="yakiStatus" role="status"></p><p id="yakiExplanation"></p><button id="jumpToYaki">Jump to Yaki’s action</button></div></div></aside>
+<html lang="he" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Ammunition Hill — Then & Now</title><meta name="description" content="Explore two reference-based 3D models of Ammunition Hill: the 1967 battlefield and the modern memorial."><link rel="stylesheet" href="theme.css"><script type="importmap">{"imports":{"three":"./three.module.js"}}</script></head>
+<body>
+<!-- Insert these sections as siblings of #mapPage, before the application script. -->
+<section id="homePage" role="main" class="front-page front-home" aria-labelledby="homeTitle">
+  <nav class="front-nav" aria-label="Memorial navigation">
+    <a class="front-wordmark" href="#home" aria-label="Ammunition Hill home">
+      <svg class="front-mark" viewBox="0 0 38 38" aria-hidden="true"><path d="M3 28 9 20 14 23 20 12 25 17 34 10M3 33 11 28 18 29 25 23 35 22"/></svg>
+      <span>Ammunition Hill</span>
+    </a>
+    <div class="language-switch front-language" role="group" aria-label="Language">
+      <button data-language="en" translate="no" aria-label="Switch to English">EN</button>
+      <button data-language="he" translate="no" aria-label="Switch to Hebrew">עברית</button>
+    </div>
+  </nav>
+
+  <div class="front-home-layout">
+    <div class="front-home-copy">
+      <p class="front-kicker front-reveal">REMEMBRANCE · HISTORY · PEOPLE</p>
+      <h1 id="homeTitle" tabindex="-1" class="front-reveal">Ammunition Hill</h1>
+      <div class="front-rule front-reveal" aria-hidden="true"></div>
+      <p class="front-dedication front-reveal">This site commemorates the Battle of Ammunition Hill as part of our national memory, with a special place for the personal stories of the soldiers.</p>
+      <div class="front-choices front-reveal" aria-label="Choose how to explore">
+        <a class="front-choice front-choice-primary" href="#guide">
+          <span class="front-choice-icon" aria-hidden="true"><svg viewBox="0 0 32 32"><path d="m4 10 8-4 8 4 8-4v17l-8 4-8-4-8 4ZM12 6v17m8-13v17"/></svg></span>
+          <span class="front-choice-copy"><strong>Explore the battle</strong><small>An interactive journey through the battlefield</small></span>
+          <span class="front-choice-arrow" aria-hidden="true">↗</span>
+        </a>
+        <a class="front-choice" href="#soldiers">
+          <span class="front-choice-icon" aria-hidden="true"><svg viewBox="0 0 32 32"><circle cx="16" cy="11" r="5"/><path d="M6 27v-3a10 10 0 0 1 20 0v3M4 4h5M4 4v5m24-5h-5m5 0v5M4 28h5m-5 0v-5m24 5h-5m5 0v-5"/></svg></span>
+          <span class="front-choice-copy"><strong>Meet the soldiers</strong><small>Personal stories, photographs and remembrance</small></span>
+          <span class="front-choice-arrow" aria-hidden="true">↗</span>
+        </a>
+      </div>
+    </div>
+
+    <div class="front-landscape front-reveal">
+      <svg class="front-terrain" viewBox="0 0 680 590" role="img" aria-label="An abstract landscape inspired by the hill’s trenches">
+        <defs>
+          <radialGradient id="frontTerrainGlow"><stop offset="0" stop-color="#d4b881" stop-opacity=".12"/><stop offset="1" stop-color="#d4b881" stop-opacity="0"/></radialGradient>
+          <linearGradient id="frontTrenchInk" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#e0c597"/><stop offset="1" stop-color="#8fbaa9"/></linearGradient>
+        </defs>
+        <ellipse cx="350" cy="285" rx="310" ry="270" fill="url(#frontTerrainGlow)"/>
+        <g class="front-contours" fill="none">
+          <path d="M-35 368C35 294 18 196 113 126S271 38 364 64s159-4 211 65 155 89 143 185-48 113-93 164-197 82-298 40-163 7-217-37S-32 432-35 368Z"/>
+          <path d="M-7 362c75-73 54-139 138-209S276 67 360 91s147-5 193 59 141 80 129 170-48 102-88 145-178 74-274 34-145 7-194-35S-64 418-7 362Z"/>
+          <path d="M30 354c60-56 48-123 119-176S280 99 358 118s129 0 176 54 117 77 104 149-42 94-82 130-157 61-239 28-128 2-174-35S-16 407 30 354Z"/>
+          <path d="M67 345c51-48 45-108 104-153s116-69 189-47 114 3 154 53 100 63 88 123-34 82-72 115-137 43-207 20-116-3-152-35S25 392 67 345Z"/>
+          <path d="M102 339c46-40 44-95 91-132s99-59 169-40 99 7 136 52 79 54 72 104-31 68-63 96-115 29-178 13-100-11-135-37S66 378 102 339Z"/>
+          <path d="M141 331c35-32 35-81 74-110s84-45 145-27 86 6 116 44 59 46 58 84-27 57-51 74-98 26-149 15-85-14-113-34S113 363 141 331Z"/>
+          <path d="M177 323c25-27 29-66 61-88s68-35 123-18 66 9 93 40 46 35 41 68-19 43-42 54-76 15-116 7-71-13-94-28S153 350 177 323Z"/>
+          <path d="M212 316c22-21 24-51 51-64s53-24 94-9 53 6 72 29 33 29 29 49-17 35-35 40-57 7-85 1-55-10-73-21S193 338 212 316Z"/>
+          <path d="M249 308c13-15 18-32 36-37s39-15 68-4 37 8 50 22 18 17 17 30-13 19-26 19-35 1-55-2-40-10-50-15S237 323 249 308Z"/>
+        </g>
+        <g class="front-trench-shadow" fill="none"><path d="m183 438 20-41-9-31 14-23-10-28 20-25-8-38 26-28-1-35 31-18 13-29 51-12 42 11 42-2 33 19 31 3 17 34 29 18 4 43 21 29-6 35 13 36-20 32-5 35-28 27-11 37"/><path d="m347 459 1-67-12-36 10-41-4-37 9-42-5-43 7-34m-145 184 39-8 21 13 30-6 38 14m-126-104 34 6 19 24 41-2 38-2m7 114 43-15 26-35 48-16"/></g>
+        <g class="front-trench-lines" fill="none"><path class="front-trench-outer" d="m183 438 20-41-9-31 14-23-10-28 20-25-8-38 26-28-1-35 31-18 13-29 51-12 42 11 42-2 33 19 31 3 17 34 29 18 4 43 21 29-6 35 13 36-20 32-5 35-28 27-11 37"/><path class="front-trench-inner" d="m347 459 1-67-12-36 10-41-4-37 9-42-5-43 7-34m-145 184 39-8 21 13 30-6 38 14m-126-104 34 6 19 24 41-2 38-2m7 114 43-15 26-35 48-16"/></g>
+        <g class="front-terrain-points"><circle cx="208" cy="343" r="4"/><circle cx="353" cy="159" r="4"/><circle cx="466" cy="341" r="4"/></g>
+        <g class="front-terrain-halo" fill="none"><circle cx="208" cy="343" r="13"/><circle cx="353" cy="159" r="13"/><circle cx="466" cy="341" r="13"/></g>
+      </svg>
+      <div class="front-landscape-caption"><span class="front-caption-line" aria-hidden="true"></span><span>JERUSALEM · JUNE 1967</span></div>
+    </div>
+  </div>
+  <div class="front-home-foot"><span class="front-memory-dot" aria-hidden="true"></span><p>To remember the battle. To know the people.</p></div>
+</section>
+
+<section id="soldiersPage" role="main" class="front-page front-inner-page" hidden aria-labelledby="soldiersTitle">
+  <nav class="front-nav" aria-label="Memorial navigation">
+    <a class="front-back" href="#home"><span aria-hidden="true">←</span><span>Back to the memorial</span></a>
+    <div class="front-nav-end"><a class="front-nav-link" href="#guide">Explore the battle</a><div class="language-switch front-language" role="group" aria-label="Language"><button data-language="en" translate="no" aria-label="Switch to English">EN</button><button data-language="he" translate="no" aria-label="Switch to Hebrew">עברית</button></div></div>
+  </nav>
+  <div class="front-inner-content">
+    <div class="front-page-heading front-reveal"><p class="front-kicker">THE PEOPLE BEHIND THE BATTLE</p><h1 id="soldiersTitle" tabindex="-1">Meet the soldiers</h1><p>Through their lives and personal stories, the memory of the battle takes on a human face.</p></div>
+    <div id="soldierCards" class="front-soldier-grid"></div>
+    <div class="front-gallery-foot"><span class="front-rule" aria-hidden="true"></span><p>Select a portrait to read the full story.</p></div>
+  </div>
+</section>
+
+<section id="guidePage" role="main" class="front-page front-inner-page front-guide-page" hidden aria-labelledby="guideTitle">
+  <nav class="front-nav" aria-label="Memorial navigation">
+    <a class="front-back" href="#home"><span aria-hidden="true">←</span><span>Back to the memorial</span></a>
+    <div class="front-nav-end"><a class="front-nav-link" href="#soldiers">Meet the soldiers</a><div class="language-switch front-language" role="group" aria-label="Language"><button data-language="en" translate="no" aria-label="Switch to English">EN</button><button data-language="he" translate="no" aria-label="Switch to Hebrew">עברית</button></div></div>
+  </nav>
+  <div class="front-inner-content front-guide-content">
+    <div class="front-page-heading front-reveal"><p class="front-kicker">A SHORT GUIDE</p><h1 id="guideTitle" tabindex="-1">Before entering the battlefield</h1><p>Explore at your own pace, and return to any part of the story.</p></div>
+    <ol class="front-guide-steps">
+      <li class="front-guide-step front-reveal"><span class="front-step-number" aria-hidden="true">01</span><div class="front-step-copy"><h2>Explore the landscape</h2><p>Drag to rotate. Scroll or pinch to zoom. Use Top view to see the trench layout.</p></div><svg class="front-guide-icon" viewBox="0 0 64 64" aria-hidden="true"><path d="m9 33 23-13 23 13-23 13Zm0 10 23 13 23-13M21 13l11-6 11 6M32 7v10"/><path d="M7 18v-7h7m36 0h7v7M7 18l7-7m36 0 7 7"/></svg></li>
+      <li class="front-guide-step front-reveal"><span class="front-step-number" aria-hidden="true">02</span><div class="front-step-copy"><h2>Follow the battle</h2><p>Play or pause the sequence. Use Previous and Next to move between phases, or Stop to return to the start.</p></div><svg class="front-guide-icon" viewBox="0 0 64 64" aria-hidden="true"><circle cx="32" cy="29" r="19"/><path d="m28 20 13 9-13 9ZM11 55h42M11 52v6m14-6v6m14-6v6m14-6v6"/></svg></li>
+      <li class="front-guide-step front-reveal"><span class="front-step-number" aria-hidden="true">03</span><div class="front-step-copy"><h2>Discover the personal stories</h2><p>Hover over a marker or tap it for details. Select a soldier’s portrait to open the full biography.</p></div><svg class="front-guide-icon" viewBox="0 0 64 64" aria-hidden="true"><path d="M14 8h36v48H14ZM23 45h18"/><circle cx="32" cy="23" r="7"/><path d="M21 39a11 11 0 0 1 22 0"/></svg></li>
+    </ol>
+    <div class="front-guide-bottom front-reveal"><p class="front-guide-note">The reconstruction is schematic; positions and timing are approximate.</p><a id="guideStart" class="front-enter" href="#map"><span>Enter the simulation</span><span aria-hidden="true">→</span></a></div>
+  </div>
+</section>
+
+<main id="mapPage" hidden>
+<header><a class="brand" href="#home" aria-label="Home">AH <span>LIVING HISTORY</span></a><div class="era-switch" role="group" aria-label="Choose a period"><button id="era1967" aria-pressed="true">June 1967</button><button id="eraToday" aria-pressed="false">Memorial today</button></div><div class="header-actions"><button id="sourcesButton" class="quiet">Sources & accuracy</button><div class="language-switch" role="group" aria-label="Language"><button data-language="en" translate="no" aria-label="Switch to English">EN</button><button data-language="he" translate="no" aria-label="Switch to Hebrew">עברית</button></div></div></header>
+<aside class="intro-panel"><nav class="map-page-links" aria-label="Site navigation"><a href="#home">Home</a><a href="#soldiers">The soldiers</a><a href="#guide">How to explore</a></nav><p class="eyebrow">ONE PLACE · TWO PERIODS</p><h1>Ammunition <br>Hill</h1><p class="hebrew" lang="he" dir="rtl">גבעת התחמושת</p><div class="era-copy"><span id="eraCaption">THE BATTLEFIELD · 1967</span><h2 id="eraTitle" tabindex="-1">Before the memorial</h2><p id="eraDescription">Follow the western, central and eastern trenches of the Jordanian outpost. Hover over a numbered place or play the battle sequence below.</p></div><div class="legend"><span><i class="trench-key"></i>Trenches</span><span><i class="building-key"></i>Buildings & positions</span></div><div class="accuracy"><b>Reference-based reconstruction</b><p id="accuracyText">Trench layout follows a published diagram. Heights, widths and building forms are estimates.</p></div><button id="mapButton" class="text-button">View the historical map ↗</button><details id="landmarkBrowser"><summary>Explore 19 places <span>Hover · tap · keyboard</span></summary><div id="landmarkList"></div></details><div id="peopleDock"><p class="eyebrow">THE PEOPLE OF THE HILL</p><div id="personDock" class="person-dock"><a class="person-link" data-person="eitan" href="#eitan"><span class="person-photo"><img id="eitanPhoto" src="eitan.jpg" alt="Eitan Naveh"></span><span><b>Eitan Naveh</b><small>Read his full story →</small></span></a><p id="eitanStatus" role="status"></p><p id="eitanExplanation"></p><button id="jumpToEitan">Jump to Eitan’s action</button></div><div id="yakiDock" class="person-dock"><a class="person-link" data-person="yaki" href="#yaki"><span class="person-photo"><img id="yakiPhoto" src="yaki.jpg" alt="Yaki Hetz"></span><span><b>Yaki Hetz</b><small>Read his full story →</small></span></a><p id="yakiStatus" role="status"></p><p id="yakiExplanation"></p><button id="jumpToYaki">Jump to Yaki’s action</button></div></div></aside>
 
 <div id="scene" aria-label="Interactive 3D reconstruction of Ammunition Hill"></div><div id="loading" role="status">Preparing both landscapes…</div>
 <div id="marker" class="person-marker"><a data-person="eitan" class="portrait" id="portrait" href="#eitan" aria-label="Read Eitan Naveh’s story" aria-describedby="eitanStatus"><img src="eitan.jpg" alt="Eitan Naveh"><span class="plus">↗</span></a><span class="marker-label">Eitan Naveh<small id="avatarCaption"></small></span></div>
@@ -23,6 +114,6 @@
 <dialog id="mapDialog"><button class="dialog-close" aria-label="Close historical map">×</button><h2>Historical battle map</h2><img src="battle-map.jpg" alt="Historical plan showing the western, central and eastern trench routes, buildings and numbered battle movements"><p>Diagram, not a measured survey. Numbered circles mark battle movements.</p><a href="https://commons.wikimedia.org/wiki/File:HATAHMOSHET1.JPG" target="_blank" rel="noopener">Museum-attributed map and license ↗</a></dialog>
 </main>
 <section id="biographyPage" class="biography-page" hidden aria-labelledby="biographyTitle">
-<nav class="biography-nav"><a id="backToMap" href="#map">Return to the battlefield</a><div class="language-switch" role="group" aria-label="Language"><button data-language="en" translate="no" aria-label="Switch to English">EN</button><button data-language="he" translate="no" aria-label="Switch to Hebrew">עברית</button></div></nav>
+<nav class="biography-nav"><div class="biography-nav-links"><a id="backToMap" href="#map">Return to the battlefield</a><a href="#home">Home</a></div><div class="language-switch" role="group" aria-label="Language"><button data-language="en" translate="no" aria-label="Switch to English">EN</button><button data-language="he" translate="no" aria-label="Switch to Hebrew">עברית</button></div></nav>
 <article class="biography"><div class="biography-hero"><figure><img id="biographyPhoto" src="eitan.jpg" alt="Portrait of Eitan Naveh"><figcaption><a id="biographyPhotoCredit" target="_blank" rel="noopener"></a> <a id="biographyPhotoLicense" target="_blank" rel="noopener" hidden>CC BY-SA 3.0 ↗</a></figcaption></figure><div><p id="biographyEyebrow" class="eyebrow"></p><h1 id="biographyTitle" tabindex="-1"></h1><p id="biographySubtitle"></p><p id="biographyIntro"></p><a id="biographyAction" class="bio-action" href="#eitan-action">Follow Eitan’s part in the battle</a></div></div><div id="biographySections"></div><section class="biography-sources" aria-labelledby="biographySourcesHeading"><h2 id="biographySourcesHeading"></h2><div id="biographySources"></div></section></article>
 </section><script type="module" src="model.js"></script></body></html>

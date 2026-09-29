@@ -14,12 +14,20 @@ Open http://localhost:8000 in a modern browser with WebGL support. The multi-fil
 
 Alternatively, download and open [`Ammunition-Hill.html`](Ammunition-Hill.html) directly in a browser. It embeds the rendering library, geometry, both portraits, and battle map. Google Fonts is optional; system fonts are used without internet access.
 
+## Entry and navigation
+
+Opening the site without a fragment shows an animated remembrance page. Hebrew is the initial language for new visitors; a saved language preference or `?lang=en` / `?lang=he` takes precedence. The home page offers two paths: **Enter the battle simulation** opens a brief three-step guide before the map, and **Meet the soldiers** opens portrait cards for Eitan Naveh and Yaki Hetz.
+
+The guide explains rotating/zooming the map, Play/Pause, Stop/reset, stepping between phases, and hover/tap stories. The simulation begins paused. **How to explore** reopens the guide. The gallery opens the existing sourced biographies, and each biography returns to its originating gallery or map. Leaving the map pauses the replay while preserving its position. Decorative animation respects the browser’s reduced-motion preference.
+
+Routes: `#home`, `#soldiers`, `#guide`, `#map`, `#eitan`, `#yaki`, and the existing `#eitan-action` / `#yaki-action` deep links. Direct map/action links retain their previous behavior.
+
 ## Controls
 
 - Drag to rotate; scroll or pinch to zoom.
 - Choose **June 1967** or **Memorial today** to switch landscapes.
 - Hover over or tap the numbered map pins, trench routes and buildings for sourced historical context. The **Explore 19 places** list and keyboard focus offer the same cards.
-- Hover over or focus either soldier’s map or sidebar portrait for a short introduction. Click/tap it, or the portrait in the sidebar, to open his full biography page. Returning preserves the selected phase and leaves playback paused.
+- Hover over or focus either soldier’s map or sidebar portrait for a short introduction. Click/tap it, or the portrait in the sidebar, to open his full biography page. Returning from a map portrait preserves the selected phase and leaves playback paused; gallery portraits return to the gallery.
 - **Jump to Eitan’s action** selects the western-trench phase. Press Play to animate his portrait along an illustrative route outside the trench. His earlier individual locations are not plotted; later phases show a stationary memorial.
 - **Jump to Yaki’s action** selects the Great Bunker phase. Press Play to follow the short illustrative approach to the bunker. Yaki survived: the following phase retains his last illustrated position without claiming his later whereabouts.
 - **EN / עברית** switches the entire interface, historical cards, replay narrative and biography. Hebrew uses right-to-left reading order. The preference is remembered when browser storage is available. `?lang=he` selects Hebrew directly.
@@ -51,7 +59,8 @@ Yaki’s route illustrates only the local Great Bunker action supported by his a
 - `index.html`, `theme.css`, `model.js`: page, presentation, interaction, and model rendering.
 - `explorer.js`, `landmarks.js`, `battle-data.js`, `playback.js`: landmark interaction, cited history, schematic movement routes and deterministic playback.
 - `eitan-motion.js`, `yaki-motion.js`: deterministic individual avatar routes.
-- `eitan-data.js`, `yaki-data.js`, `people.js`, `biography.js`: bilingual biographies, shared identities, portrait credits and biography routing.
+- `eitan-data.js`, `yaki-data.js`, `people.js`, `biography.js`: bilingual biographies, shared identities and portrait credits.
+- `navigation.js`: home, gallery, guide and map routing, with biography return context.
 - `i18n.js`, `history-he.js`: interface language switching and Hebrew historical content.
 - `historical-geometry.js`: hand-traced historical layout.
 - `current-geometry.js`: transformed present-day map data.

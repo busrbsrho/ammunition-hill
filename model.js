@@ -4,7 +4,7 @@ import {historicPaths,historicBunkers,historicBuildings,hp} from './historical-g
 import {currentGeometry} from './current-geometry.js';
 import {createExplorer} from './explorer.js';
 import {initLanguage,t,language,onLanguageChange} from './i18n.js';
-import {initBiography} from './biography.js';
+import {initNavigation} from './navigation.js';
 import {people,portraitSource} from './people.js';
 initLanguage();
 
@@ -117,5 +117,6 @@ function updateYaki(state){yakiState=state;const mode=state.mode;
   if($('#yakiExplanation').textContent!==t(explanation))$('#yakiExplanation').textContent=t(explanation);
   $('#yakiAvatarCaption').textContent=t(mode==='completed'?'Action complete · last illustrated position':'Overcoming the Great Bunker · approximate route');
 }
-onLanguageChange(()=>{updateEraText();if(scene)createLabels();updateEitan(eitanState);updateYaki(yakiState);if(!story.hidden)renderStory();resize();});
-initBiography({onOpen:()=>{explorer?.pause();explorer?.close();closeStory();for(const d of document.querySelectorAll('dialog[open]'))d.close();},onReturn:()=>{resize();},onFollow:id=>{if(explorer){switchEra('1967');explorer.seekPerson(id);}}});
+onLanguageChange(()=>{updateEraText();if(labelSets[era])createLabels();updateEitan(eitanState);updateYaki(yakiState);if(!story.hidden)renderStory();resize();});
+let mapVisited=false;
+initNavigation({onLeaveMap:()=>{explorer?.pause();explorer?.close();closeStory();for(const d of document.querySelectorAll('dialog[open]'))d.close();},onMap:({fromGuide})=>{if(fromGuide&&explorer)switchEra('1967');resize();if(!mapVisited&&camera&&controls){reset();mapVisited=true;}},onFollow:id=>{if(explorer){switchEra('1967');explorer.seekPerson(id);}}});

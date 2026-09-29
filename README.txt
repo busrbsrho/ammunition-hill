@@ -73,3 +73,13 @@ Portrait: Tal Eidelman (טל אידלמן), CC BY-SA 3.0. Original file unchange
 portraits use a CSS display crop, also under CC BY-SA 3.0.
 https://commons.wikimedia.org/wiki/File:Yaki_Hetz.jpg
 https://creativecommons.org/licenses/by-sa/3.0/
+
+
+HOME, SOLDIERS AND FIRST-VISIT GUIDE
+Open the page without a #fragment for the remembrance home page. Hebrew is the
+default for new visitors; an existing saved language choice is respected.
+Enter the battle simulation opens a short illustrated guide. Meet the soldiers
+opens the portrait gallery. A biography returns to the page it was opened from.
+The map keeps its playback position paused while another page is open.
+Home/guide animations respect reduced-motion preferences. Both EN and עברית
+are available on every page, and the standalone file includes all new views.

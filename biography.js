@@ -1,7 +1,7 @@
 import {people,portraitSource} from './people.js';
 import {language,t,onLanguageChange} from './i18n.js';
 
-export function initBiography({onOpen,onReturn,onFollow}){
+export function initBiography({onOpen,onReturn,onFollow,managed=false}){
   const $=s=>document.querySelector(s);let opened=false,personId='eitan',returnScroll=0,returnFocus=null;
   function render(){const lang=language(),person=people[personId],data=person.biography[lang];
     $('#biographyEyebrow').textContent=data.eyebrow;$('#biographyTitle').textContent=data.name;
@@ -25,6 +25,6 @@ export function initBiography({onOpen,onReturn,onFollow}){
     const actionId=hash.endsWith('-action')?hash.slice(0,-7):null;
     if(actionId&&Object.hasOwn(people,actionId)){onFollow(actionId);$('#battlePanel').scrollIntoView({block:'center',behavior:'instant'});}
   }
-  onLanguageChange(render);window.addEventListener('hashchange',route);render();route();
-  return {isOpen:()=>opened};
+  onLanguageChange(render);if(!managed)window.addEventListener('hashchange',route);render();if(!managed)route();
+  return {isOpen:()=>opened,show(id){if(!Object.hasOwn(people,id))throw new RangeError('Unknown soldier');personId=id;opened=true;render();},hide(){opened=false;}};
 }
